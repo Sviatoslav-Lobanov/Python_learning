@@ -31,7 +31,7 @@ def winner ():
              [(0, 1), (1, 1), (2, 1)],
              [(0, 2), (1, 2), (2, 2)],
              [(0, 0), (1, 1), (2, 2)],
-             [(2, 2), (1, 1), (0, 0)]]
+             [(0, 2), (1, 1), (2, 0)]]
     for i in range(8):
         if square[combo[i][0][0]][combo[i][0][1]]==square[combo[i][1][0]][combo[i][1][1]]==square[combo[i][2][0]][combo[i][2][1]]!=' ':
             print(i, square[combo[i][0][0]][combo[i][0][1]], square[combo[i][1][0]][combo[i][1][1]],
