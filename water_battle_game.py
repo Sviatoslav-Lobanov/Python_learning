@@ -205,17 +205,17 @@ class Player:
     def __init__(self, board, enemy):
         self.board = board
         self.enemy = enemy
+        self.last_shoot = None
 
     def ask(self):
         raise NotImplementedError()
 
-    def move(self):
-        last_shoot = None
+    def move(self,shoot_near):
         while True:
             try:
-                target = self.ask(last_shoot)
+                target = self.ask(shoot_near)
                 repeat = self.enemy.shot(target)
-                # last_shoot = target
+                self.last_shoot = target
                 # if repeat: print ("после попадания вторая попытка",last_shoot)
                 return repeat
             except BoardException as e:
@@ -226,43 +226,46 @@ class Player:
 
 
 class AI(Player):
-    def ask(self,last_shoot):
-        # print(last_shoot)  попытка научить стрелять рядом
-        # if last_shoot:
-        #     while True:
-        #         try:
-        #             print("стреляю рядом 1")
-        #             d = Dot(last_shoot.x, last_shoot, y + 1)
-        #             break
-        #         except BoardException as e:
-        #             print(e)
-        #         try:
-        #             print("стреляю рядом 2")
-        #             d = Dot(last_shoot.x, last_shoot, y - 1)
-        #             break
-        #         except BoardException as e:
-        #             print(e)
-        #         try:
-        #             print("стреляю рядом 3")
-        #             d = Dot(last_shoot.x + 1, last_shoot, y)
-        #             break
-        #         except BoardException as e:
-        #             print(e)
-        #         try:
-        #             print("стреляю рядом 4")
-        #             d = Dot(last_shoot.x - 1, last_shoot, y)
-        #             break
-        #         except BoardException as e:
-        #             print(e)
-        #
-        # else:
-        d = Dot(randint(0, 5), randint(0, 5))
+    def ask(self, shoot_near):
+        if self.last_shoot is not None:
+            print("Последний выстрел компьютера ",self.last_shoot.x+1,self.last_shoot.y+1)
+        # Учтим стрелять рядом
+        if shoot_near:
+            while True:
+                try:
+                    print("стреляю рядом 1")
+                    d = Dot(self.last_shoot.x, self.last_shoot.y + 1)
+                    break
+                except BoardException as e:
+                    print(e)
+                try:
+                    print("стреляю рядом 2")
+                    d = Dot(self.last_shoot.x, self.last_shoot.y - 1)
+                    break
+                except BoardException as e:
+                    print(e)
+                try:
+                    print("стреляю рядом 3")
+                    d = Dot(self.last_shoot.x + 1, self.last_shoot.y)
+                    break
+                except BoardException as e:
+                    print(e)
+                try:
+                    print("стреляю рядом 4")
+                    d = Dot(self.last_shoot.x - 1, self.last_shoot.y)
+                    break
+                except BoardException as e:
+                    print(e)
+        else:
+            d = Dot(randint(0, 5), randint(0, 5))
         print(f"Ход компьютера: {d.x + 1} {d.y + 1}")
         return d
 
 
 class User(Player):
-    def ask(self,last_shoot):
+    def ask(self,shoot_near):
+        if self.last_shoot is not None:
+            print("Последний выстрел игрока ", self.last_shoot.x+1,self.last_shoot.y+1)
         while True:
             cords = input("Ваш ход: ").split()
 
@@ -297,8 +300,8 @@ class Game:
         self.size = size
         choice = None
         pl = None
-        while choice is None:
-            choice = int(input("0 - случайная расстановка кораблей, 1 - раставить самостоятельно"))
+        while choice is None: # Запускаем выбор расстановки кораблей
+            choice = int(input("0 - случайная расстановка кораблей, 1 - раставить самостоятельно :"))
             if choice == 0:
                 pl = self.random_board()
                 break
@@ -390,6 +393,7 @@ class Game:
 
     def loop(self):
         num = 0
+        shoot_near = False
         while True:
             print("-" * 20)
             # print("Доска пользователя:")
@@ -401,13 +405,17 @@ class Game:
             if num % 2 == 0:
                 print("-" * 20)
                 print("Ходит пользователь!")
-                repeat = self.us.move()
+                repeat = self.us.move(shoot_near)
             else:
                 print("-" * 20)
                 print("Ходит компьютер!")
-                repeat = self.ai.move()
+                repeat = self.ai.move(shoot_near)
             if repeat:
                 num -= 1
+                shoot_near = True
+            else:
+                shoot_near = False
+
 
             if self.ai.board.count == 7:
                 print("-" * 20)
