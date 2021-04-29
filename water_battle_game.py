@@ -295,8 +295,20 @@ class User(Player):
 class Game:
     def __init__(self, size=6):
         self.size = size
-        # pl = self.self_board()
-        pl = self.random_board()
+        choice = None
+        pl = None
+        while choice is None:
+            choice = int(input("0 - случайная расстановка кораблей, 1 - раставить самостоятельно"))
+            if choice == 0:
+                pl = self.random_board()
+                break
+            elif choice == 1:
+                pl = self.self_board()
+                break
+            else:
+                choice = None
+                print("Неверно выбрано значение")
+
         co = self.random_board()
         co.hid = True
 
